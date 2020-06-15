@@ -2,10 +2,11 @@ from pathlib import Path
 
 class Site():
     """ The site class """
-    def __init__(self, source, dest):
+    def __init__(self, source, dest, parsers=None):
         """ Intialise with source and dest """
         self.source = Path(source)
         self.dest = Path(dest)
+        self.parsers = parsers or []
     
     def create_dir(self,path):
         """ Creates directory at path"""
@@ -19,4 +20,22 @@ class Site():
                 try:
                     self.create_dir(path)
                 except:
-                    print("error build(): dir error")
+                    print("error build")
+            elif path.is_file():
+                try:
+                    self.run_parser(path)
+                except:
+                    print("error")
+                    
+    def load_parser(self, extension):
+        for parser in self.parsers:
+            if parser.valid_extension(extension):
+                return parser
+    
+    def run_parser(self, path: Path):
+        parser = self.load_parser(path.suffix)
+        if parser is not None:
+            parser.parse(path,self.source, self.dest)
+        else:
+            print("Not Implented")
+    
